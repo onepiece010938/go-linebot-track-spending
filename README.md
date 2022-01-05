@@ -1,2 +1,2 @@
-# go-linebot-redis-track-spending ()
+# go-linebot-redis-track-spending
 practice golang &amp; redis 
