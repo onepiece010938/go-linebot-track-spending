@@ -1,57 +1,22 @@
+/*
+Copyright © 2023 Raymond onepiece010938@gmail.com
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
 package main
 
-import (
-	"go-line-bot/models"
-	"go-line-bot/router"
-	"log"
-	"net/http"
-	"os"
-
-	_ "github.com/joho/godotenv/autoload"
-	"github.com/line/line-bot-sdk-go/linebot"
-
-	// "io"
-	"context"
-
-	"github.com/go-redis/redis/v8"
-)
-
-var (
-	err error
-)
+import "go-line-bot/cmd"
 
 func main() {
-	// writeCsvFile()
-	// 建立客戶端
-	router.LClient, err = linebot.New(os.Getenv("CHANNEL_SECRET"), os.Getenv("CHANNEL_ACCESS_TOKEN"))
-
-	if err != nil {
-		log.Println(err.Error())
-	}
-	//connect redis
-	models.Rdb = redis.NewClient(&redis.Options{
-		Addr:     "localhost:6666",
-		Password: "", // no password set
-		DB:       0,  // use default DB
-	})
-
-	_, err1 := models.Rdb.Ping(context.Background()).Result()
-	if err != nil {
-		log.Printf("redis connect get failed.%v", err1)
-		return
-	}
-	log.Printf("redis connect success")
-
-	//初始化 資料庫
-	//定義 允許名單資料表
-	models.Rdb.HSet(router.Ctx, "allow_user", "line_login_user_id", "ok")
-
-	// bloomFilter(ctx, rdb)
-
-	http.HandleFunc("/download/", router.DownloadFile)
-
-	http.HandleFunc("/callback", router.CallbackHandler)
-
-	log.Fatal(http.ListenAndServe(":5055", nil))
-
+	cmd.Execute()
 }
