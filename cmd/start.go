@@ -4,7 +4,8 @@ Copyright © 2023 Raymond onepiece010938@gmail.com
 package cmd
 
 import (
-	"fmt"
+	"errors"
+	"go-line-bot/cmd/bot"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -15,31 +16,50 @@ var startCmd = &cobra.Command{
 	Use:   "start",
 	Short: "Start the server",
 	Long:  `Start the linebot server and init with your channel secret & channel access token`,
-	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("start called")
-		fmt.Println(args)
-		// cmd.Flags().GetString()
-		s, _ := cmd.PersistentFlags().GetString("secret")
-		fmt.Println("---->", s)
-		fmt.Println(viper.GetString("baseDomain"))
-		fmt.Println(viper.Get("CHANNEL_SECRET"))
+	PreRunE: func(cmd *cobra.Command, args []string) error {
+		return configCheck(cmd)
+	},
+	RunE: func(cmd *cobra.Command, args []string) error {
+		bot.ServerStart()
+		return nil
+
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(startCmd)
+	// cobra.OnInitialize(initToken)
 	startCmd.PersistentFlags().StringP("secret", "s", "", "Line Channel Secret")
 	startCmd.PersistentFlags().StringP("token", "t", "", "Line Channel Access Token")
+	// startCmd.MarkPersistentFlagRequired("secret")
+	// startCmd.MarkPersistentFlagRequired("token")
 
-	startCmd.MarkPersistentFlagRequired("secret")
-	startCmd.MarkPersistentFlagRequired("token")
-	// Here you will define your flags and configuration settings.
+}
 
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// startCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// startCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+func configCheck(cmd *cobra.Command) error {
+	// Get flag
+	secert, err := cmd.PersistentFlags().GetString("secret")
+	if err != nil {
+		return err
+	}
+	token, err := cmd.PersistentFlags().GetString("token")
+	if err != nil {
+		return err
+	}
+	if secert != "" {
+		// get falg save to viper
+		viper.Set("CHANNEL_SECRET", secert)
+	}
+	if token != "" {
+		// get falg save to viper
+		viper.Set("CHANNEL_ACCESS_TOKEN", token)
+	}
+	// Both flag and ENV didn't set value
+	if viper.Get("CHANNEL_SECRET") == nil {
+		return errors.New("line channel secret is not set")
+	}
+	if viper.Get("CHANNEL_ACCESS_TOKEN") == nil {
+		return errors.New("line channel access token is not set")
+	}
+	return nil
 }

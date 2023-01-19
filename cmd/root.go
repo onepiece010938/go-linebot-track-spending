@@ -24,7 +24,6 @@ import (
 )
 
 var cfgFile string
-var dns string
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -35,8 +34,6 @@ var rootCmd = &cobra.Command{
 	// has an action associated with it:
 	Run: func(cmd *cobra.Command, args []string) {
 		cmd.Help()
-		fmt.Println(viper.GetString("baseDomain"))
-		fmt.Println(cfgFile)
 	},
 }
 
@@ -50,16 +47,11 @@ func Execute() {
 }
 
 func init() {
-	cobra.OnInitialize(initConfig, initMyConfig)
+	cobra.OnInitialize(initConfig)
 	// Here you will define your flags and configuration settings.
 	// Cobra supports persistent flags, which, if defined here,
 	// will be global for your application.
-
 	rootCmd.PersistentFlags().StringVarP(&cfgFile, "config", "c", "", "config file (default is .config/config.yaml)")
-	// Cobra also supports local flags, which will only run
-	// when this action is called directly.
-	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
-	rootCmd.PersistentFlags().StringVarP(&dns, "dns", "d", "", "dns url")
 }
 
 // initConfig reads in config file and ENV variables if set.
@@ -73,7 +65,7 @@ func initConfig() {
 
 		viper.AddConfigPath(home + "/config")
 		viper.SetConfigType("yaml")
-		viper.SetConfigName("config")
+		viper.SetConfigName("go-line-bot")
 	}
 
 	viper.AutomaticEnv() // read in environment variables that match
@@ -81,14 +73,9 @@ func initConfig() {
 	// If a config file is found, read it in.
 	if err := viper.ReadInConfig(); err == nil {
 		fmt.Fprintln(os.Stderr, "Using config file:", viper.ConfigFileUsed())
-	}
-}
-
-func initMyConfig() {
-	if dns != "" {
-		// Use dns from the flag.
-		viper.Set("baseDomain", dns)
 	} else {
-		viper.Set("baseDomain", "I am default dns")
+		// No config get by flag or default
+		cobra.CheckErr(err)
 	}
+
 }

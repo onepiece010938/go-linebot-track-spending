@@ -1,14 +1,14 @@
-package main
+package bot
 
 import (
 	"go-line-bot/models"
 	"go-line-bot/router"
 	"log"
 	"net/http"
-	"os"
 
 	_ "github.com/joho/godotenv/autoload"
 	"github.com/line/line-bot-sdk-go/linebot"
+	"github.com/spf13/viper"
 
 	// "io"
 	"context"
@@ -20,10 +20,11 @@ var (
 	err error
 )
 
-func main() {
+func ServerStart() {
 	// writeCsvFile()
+
 	// 建立客戶端
-	router.LClient, err = linebot.New(os.Getenv("CHANNEL_SECRET"), os.Getenv("CHANNEL_ACCESS_TOKEN"))
+	router.LClient, err = linebot.New(viper.GetString("CHANNEL_SECRET"), viper.GetString("CHANNEL_ACCESS_TOKEN"))
 
 	if err != nil {
 		log.Println(err.Error())
@@ -51,7 +52,7 @@ func main() {
 	http.HandleFunc("/download/", router.DownloadFile)
 
 	http.HandleFunc("/callback", router.CallbackHandler)
-
+	log.Printf("start serve on port 5055")
 	log.Fatal(http.ListenAndServe(":5055", nil))
 
 }

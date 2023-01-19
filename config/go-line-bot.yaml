@@ -1,0 +1,10 @@
+name: "Raymond"
+common:
+  env: "dev"
+  log_level: "info"
+  port: 5055
+postgres:
+  dsn: "postgresql://ubuntu:ubuntu@192.168.1.15:5432/linebot?sslmode=disable"
+  test_dsn: "postgresql://ubuntu:ubuntu@192.168.1.15:5432/linebot?sslmode=disable"
+redis:
+  dsn: ""
